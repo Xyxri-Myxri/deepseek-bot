@@ -1,5 +1,3 @@
-from typing import Coroutine
-
 from openai import OpenAI, OpenAIError
 
 from bot.config import DEEPSEEK_API_KEY, DEEPSEEK_BASE_URL
@@ -8,13 +6,13 @@ from bot.services.presets import get_preset_text
 client = OpenAI(base_url=DEEPSEEK_BASE_URL, api_key=DEEPSEEK_API_KEY)
 
 
-async def query_deepseek(prompt: str, preset_name: str = "default") -> Coroutine[None, None, str]:
+async def query_deepseek(prompt: str, preset_name: str = "default") -> str:
     """Отправляет запрос в OpenRouter с учетом пресета и строгих инструкций"""
     preset_text = get_preset_text(preset_name)
     full_prompt = f"{preset_text}\n\n{prompt}".strip()
 
     try:
-        completion = await client.chat.completions.create(
+        completion = client.chat.completions.create(
             model="deepseek/deepseek-chat",
             messages=[{"role": "user", "content": full_prompt}],
         )
