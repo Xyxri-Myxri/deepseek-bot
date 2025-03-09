@@ -17,4 +17,4 @@ POSTGRES_DB = os.getenv("POSTGRES_DB")
 REDIS_HOST = os.getenv("REDIS_HOST")
 REDIS_PORT = os.getenv("REDIS_PORT")
 
-RATE_LIMIT = 1
+RATE_LIMIT = os.getenv("RATE_LIMIT")
