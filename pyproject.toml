@@ -6,8 +6,13 @@ description = "Telegram bot for interacting with DeepSeek API"
 authors = [{ name = "Xyxri-myxri", email = "kaveringleb@gmail.com" }]
 dependencies = [
     "aiogram==3.18.0",
+    "alembic==1.15.1",
+    "asyncpg==0.30.0",
     "openai==1.65.4",
-    "python-dotenv==1.0.1"
+    "psycopg2-binary>=2.9.10",
+    "python-dotenv==1.0.1",
+    "redis>=5.2.1",
+    "sqlalchemy>=2.0.38",
 ]
 
 [tool.ruff]
@@ -35,5 +40,8 @@ build-backend = "setuptools.build_meta"
 
 [dependency-groups]
 dev = [
-    "ruff>=0.9.10",
+    "ruff==0.9.10",
 ]
+
+[tool.setuptools]
+packages = ["bot", "migrations"]
