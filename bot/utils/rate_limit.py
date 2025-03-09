@@ -1,4 +1,3 @@
-import os
 import redis.asyncio as redis
 import functools
 from aiogram import types
