@@ -10,6 +10,30 @@ dependencies = [
     "python-dotenv==1.0.1"
 ]
 
+[tool.ruff]
+target-version = "py311"
+line-length = 88
+fix = true  # Автоисправление кода
+unsafe-fixes = true
+
+[tool.ruff.lint]
+select = [
+    "E", "F", "W",  # Ошибки кодстайла (flake8)
+    "I",  # Упорядочивание импортов (isort)
+    "N",  # Нейминг переменных (pep8-naming)
+    "B",  # Оптимизация кода (flake8-bugbear)
+    "PL", # Pylint-плагины
+]
+ignore = ["E501"]  # Отключаем проверку длины строк (Black уже форматирует)
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["F401"]  # Игнорируем неиспользуемые импорты в `__init__.py`
+
 [build-system]
 requires = ["setuptools", "wheel"]
 build-backend = "setuptools.build_meta"
+
+[dependency-groups]
+dev = [
+    "ruff>=0.9.10",
+]
