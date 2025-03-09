@@ -1,0 +1,15 @@
+[project]
+requires-python = ">=3.12"
+name = "deepseek-bot"
+version = "0.1.0"
+description = "Telegram bot for interacting with DeepSeek API"
+authors = [{ name = "Xyxri-myxri", email = "kaveringleb@gmail.com" }]
+dependencies = [
+    "aiogram==3.18.0",
+    "openai==1.65.4",
+    "python-dotenv==1.0.1"
+]
+
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"

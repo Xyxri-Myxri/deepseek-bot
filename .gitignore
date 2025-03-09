@@ -1,0 +1,44 @@
+.env
+# Игнорируем виртуальное окружение
+.venv/
+venv/
+
+# Файлы конфигурации и токенов
+.env
+*.env
+
+# Кешированные файлы Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.cache
+
+# Логи и временные файлы
+logs/
+*.log
+*.out
+*.err
+nohup.out
+bot.log
+
+# Файлы IDE (PyCharm, VSCode, Jupyter и др.)
+.idea/
+.vscode/
+*.ipynb_checkpoints
+*.swp
+*.swo
+
+# Системные файлы
+.DS_Store
+Thumbs.db
+
+# UV-зависимости
+uv.lock
+
+# Файлы pip / poetry / setuptools
+pip-log.txt
+pip-delete-this-directory.txt
+*.egg-info/
+dist/
+build/
