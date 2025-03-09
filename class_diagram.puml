@@ -1,0 +1,47 @@
+@startuml Deepseek Bot
+
+' ====== Основные классы бота ======
+class Bot {
+    + start() : None
+    + stop() : None
+    + run() : None
+}
+
+class QueryHandler {
+    + handle_query(message: Message) : None
+}
+
+class RateLimiter {
+    + is_rate_limited(user_id: int) : bool
+    + limit_requests(func) : callable
+}
+
+class DeepSeekService {
+    + query_deepseek(text: str, style: str) : str
+}
+
+class HistoryStorage {
+    + save_user_query(user_id: int, query: str, response: str) : None
+    + get_user_history(user_id: int, limit: int) : list
+}
+
+' ====== Инфраструктура (БД и Redis) ======
+class Database {
+    + init_db() : Pool
+}
+
+class RedisClient {
+    + get(key: str) : str
+    + set(key: str, value: str, ex: int) : None
+    + incr(key: str) : None
+}
+
+' ====== Взаимосвязи ======
+Bot --> QueryHandler : обрабатывает сообщения
+QueryHandler --> DeepSeekService : отправляет запросы
+QueryHandler --> HistoryStorage : сохраняет запросы
+QueryHandler --> RateLimiter : проверяет лимиты
+HistoryStorage --> Database : использует БД
+RateLimiter --> RedisClient : хранит лимиты в Redis
+
+@enduml
