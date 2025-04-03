@@ -2,7 +2,14 @@ from aiogram.types import KeyboardButton, ReplyKeyboardMarkup
 
 # Главное меню
 MAIN_MENU = ReplyKeyboardMarkup(
-    keyboard=[[KeyboardButton(text="🎨 Выбрать стиль ответа")]], resize_keyboard=True
+    keyboard=[
+        [KeyboardButton(text="🎨 Выбрать стиль ответа")],
+        [
+            KeyboardButton(text="📜 История запросов"),
+            KeyboardButton(text="ℹ️ Информация"),
+        ],
+    ],
+    resize_keyboard=True,
 )
 
 # Выбор стиля ответа
@@ -15,5 +22,11 @@ STYLE_KB = ReplyKeyboardMarkup(
             KeyboardButton(text="⬅️ Назад в меню"),
         ],
     ],
+    resize_keyboard=True,
+)
+
+# Клавиатура после выбора стиля
+QUERY_KB = ReplyKeyboardMarkup(
+    keyboard=[[KeyboardButton(text="⬅️ Назад в меню")]],
     resize_keyboard=True,
 )

@@ -35,7 +35,7 @@ async def save_user_query(user_id: int, query: str, response: str):
         )
 
 
-async def get_user_history(user_id: int, limit: int = 5):
+async def get_user_history(user_id: int, limit: int = 100):
     """Получает последние запросы пользователя"""
     pool = await init_db()
     async with pool.acquire() as conn:
@@ -44,4 +44,4 @@ async def get_user_history(user_id: int, limit: int = 5):
             user_id,
             limit,
         )
-    return rows
+        return [dict(row) for row in rows]  # Преобразуем в список словарей для удобства
