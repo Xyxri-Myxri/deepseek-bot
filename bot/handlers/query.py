@@ -145,12 +145,22 @@ async def choose_style(message: types.Message):
 @router.message(lambda msg: msg.text in PRESET_OPTIONS)
 async def set_preset(message: types.Message):
     """Сохраняет выбранный стиль"""
+    user_id = message.from_user.id
     preset_name = PRESET_OPTIONS[message.text]
+    current_preset = message.bot.user_data.get(user_id, "default")
+    
+    if current_preset == preset_name:
+        await message.answer(
+            f'ℹ️ Стиль "{message.text}" уже выбран!',
+            reply_markup=QUERY_KB,
+        )
+        return
+        
+    message.bot.user_data[user_id] = preset_name  # Запоминаем стиль
     await message.answer(
         f'✅ Стиль "{message.text}" установлен!\n\nТеперь отправьте свой запрос',
         reply_markup=QUERY_KB,
     )
-    message.bot.user_data[message.from_user.id] = preset_name  # Запоминаем стиль
 
 
 @router.message(lambda msg: msg.text == "❌ Отменить ввод")
@@ -191,7 +201,6 @@ async def handle_query(message: types.Message):
     # Редактируем сообщение с ответом
     await response_msg.edit_text(response, parse_mode="Markdown")
 
-    # Возвращаем главное меню после ответа
-    await message.answer("🔙 Главное меню", reply_markup=MAIN_MENU)
+    # Очищаем выбранный стиль
     if user_id in message.bot.user_data:
         del message.bot.user_data[user_id]
