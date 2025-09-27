@@ -1,11 +1,13 @@
+import logging
 from aiogram import Router, types, F
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 
 from bot.db.database import get_user_history, save_user_query
-from bot.keyboards.main import STYLE_KB, QUERY_KB, MAIN_MENU
+from bot.keyboards.main import STYLE_KB, QUERY_KB, MAIN_MENU, SETTINGS_KB, ENHANCEMENT_KB
 from bot.keyboards.inline import get_history_keyboard, get_info_keyboard
 from bot.services.deepseek import query_deepseek
+from bot.services.query_enhancement import enhance_query, should_enhance_query, get_query_analysis
 from bot.utils.rate_limit import limit_requests
 
 router = Router()
@@ -179,24 +181,101 @@ async def back_to_menu(message: types.Message):
     await message.answer("🔙 Главное меню", reply_markup=MAIN_MENU)
 
 
+@router.message(lambda msg: msg.text == "🔧 Настройки")
+async def show_settings(message: types.Message):
+    """Показывает настройки бота"""
+    await message.answer("⚙️ Настройки бота:", reply_markup=SETTINGS_KB)
+
+
+@router.message(lambda msg: msg.text == "🔧 Query Enhancement")
+async def show_enhancement_settings(message: types.Message):
+    """Показывает настройки Query Enhancement"""
+    user_id = message.from_user.id
+    enhancement_enabled = message.bot.user_data.get(f"{user_id}_enhancement", True)
+    
+    status = "✅ Включено" if enhancement_enabled else "❌ Отключено"
+    await message.answer(
+        f"🔧 *Query Enhancement*\n\n"
+        f"Текущий статус: {status}\n\n"
+        f"Query Enhancement автоматически улучшает ваши запросы для получения более качественных ответов.",
+        parse_mode="Markdown",
+        reply_markup=ENHANCEMENT_KB
+    )
+
+
+@router.message(lambda msg: msg.text == "✅ Включить")
+async def enable_enhancement(message: types.Message):
+    """Включает Query Enhancement"""
+    user_id = message.from_user.id
+    message.bot.user_data[f"{user_id}_enhancement"] = True
+    await message.answer(
+        "✅ Query Enhancement включен!\n\nТеперь ваши запросы будут автоматически улучшаться для лучших ответов.",
+        reply_markup=SETTINGS_KB
+    )
+
+
+@router.message(lambda msg: msg.text == "❌ Отключить")
+async def disable_enhancement(message: types.Message):
+    """Отключает Query Enhancement"""
+    user_id = message.from_user.id
+    message.bot.user_data[f"{user_id}_enhancement"] = False
+    await message.answer(
+        "❌ Query Enhancement отключен!\n\nЗапросы будут обрабатываться без улучшений.",
+        reply_markup=SETTINGS_KB
+    )
+
+
+@router.message(lambda msg: msg.text == "⬅️ Назад к настройкам")
+async def back_to_settings(message: types.Message):
+    """Возвращает к настройкам"""
+    await show_settings(message)
+
+
 @router.message(~F.text.startswith("/"))  # Не ловим команды
 @limit_requests()
 async def handle_query(message: types.Message):
-    """Обрабатывает запрос с анимацией 'Обработка...' и форматированием"""
+    """Обрабатывает запрос с Query Enhancement и анимацией 'Обработка...'"""
     user_id = message.from_user.id
     preset_name = message.bot.user_data.get(user_id, "default")  # Получаем стиль
-    query_text = message.text.strip()
+    original_query = message.text.strip()
 
     # Отправляем временное сообщение
     response_msg = await message.answer(
         "⏳ *Обработка запроса...*", parse_mode="Markdown"
     )
 
-    # Генерируем ответ
-    response = await query_deepseek(message.text, preset_name)
+    # Query Enhancement: проверяем настройки пользователя и улучшаем запрос
+    enhanced_query = original_query
+    enhancement_used = False
+    enhancement_enabled = message.bot.user_data.get(f"{user_id}_enhancement", True)
+    
+    # Логируем оригинальный запрос
+    logging.info(f"User {user_id} original query: '{original_query}'")
+    
+    if enhancement_enabled and await should_enhance_query(original_query):
+        enhanced_query = await enhance_query(original_query)
+        if enhanced_query != original_query:
+            enhancement_used = True
+            # Логируем улучшенный запрос
+            logging.info(f"User {user_id} enhanced query: '{enhanced_query}'")
+            # Обновляем сообщение о том, что запрос улучшен
+            await response_msg.edit_text(
+                "🔧 *Улучшаю запрос для лучшего ответа...*", parse_mode="Markdown"
+            )
+        else:
+            logging.info(f"User {user_id} query enhancement: no improvement needed")
+    else:
+        logging.info(f"User {user_id} query enhancement: disabled or not needed")
 
-    # Сохраняем в БД
-    await save_user_query(user_id, query_text, response)
+    # Генерируем ответ с улучшенным запросом
+    response = await query_deepseek(enhanced_query, preset_name)
+
+    # Добавляем информацию об улучшении в ответ (опционально)
+    if enhancement_used and len(enhanced_query) > len(original_query):
+        response = f"💡 *Улучшенный запрос:* {enhanced_query}\n\n" + response
+
+    # Сохраняем в БД (сохраняем оригинальный запрос и улучшенный)
+    await save_user_query(user_id, original_query, response)
 
     # Редактируем сообщение с ответом
     await response_msg.edit_text(response, parse_mode="Markdown")

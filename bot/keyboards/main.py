@@ -8,6 +8,7 @@ MAIN_MENU = ReplyKeyboardMarkup(
             KeyboardButton(text="📜 История запросов"),
             KeyboardButton(text="ℹ️ Информация"),
         ],
+        [KeyboardButton(text="🔧 Настройки")],
     ],
     resize_keyboard=True,
 )
@@ -28,5 +29,23 @@ STYLE_KB = ReplyKeyboardMarkup(
 # Клавиатура после выбора стиля
 QUERY_KB = ReplyKeyboardMarkup(
     keyboard=[[KeyboardButton(text="⬅️ Назад в меню")]],
+    resize_keyboard=True,
+)
+
+# Настройки
+SETTINGS_KB = ReplyKeyboardMarkup(
+    keyboard=[
+        [KeyboardButton(text="🔧 Query Enhancement")],
+        [KeyboardButton(text="⬅️ Назад в меню")],
+    ],
+    resize_keyboard=True,
+)
+
+# Query Enhancement настройки
+ENHANCEMENT_KB = ReplyKeyboardMarkup(
+    keyboard=[
+        [KeyboardButton(text="✅ Включить"), KeyboardButton(text="❌ Отключить")],
+        [KeyboardButton(text="⬅️ Назад к настройкам")],
+    ],
     resize_keyboard=True,
 )
